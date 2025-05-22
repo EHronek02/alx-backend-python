@@ -3,14 +3,18 @@ import uuid
 import mysql.connector
 from mysql.connector import Error
 from typing import Generator, Tuple, Dict, Any
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def connect_db() -> mysql.connector.connection.MySQLConnection:
     """Connect to the MySQL database server"""
     try:
         connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password=''  # Add your MySQL password here if needed
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD")
         )
         return connection
     except Error as e:
@@ -33,10 +37,10 @@ def connect_to_prodev() -> mysql.connector.connection.MySQLConnection:
     """Connect to the ALX_prodev database in MySQL"""
     try:
         connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='',  # Add your MySQL password here if needed
-            database='ALX_prodev'
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME")
         )
         return connection
     except Error as e:
@@ -73,14 +77,15 @@ def insert_data(connection: mysql.connector.connection.MySQLConnection, csv_file
             csv_reader = csv.DictReader(file)
             
             for row in csv_reader:
-                # Check if user_id already exists
-                cursor.execute("SELECT 1 FROM user_data WHERE user_id = %s", (row['user_id'],))
+                user_id = str(uuid.uuid4())
+
+                # Check if user with same email already exists
+                cursor.execute("SELECT 1 FROM user_data WHERE email = %s", (row['email'],))
                 if not cursor.fetchone():
-                    # Insert new record
+                    # Insert a new record
                     cursor.execute("""
-                        INSERT INTO user_data (user_id, name, email, age)
-                        VALUES (%s, %s, %s, %s)
-                    """, (row['user_id'], row['name'], row['email'], int(row['age'])))
+                                   INSERT INTO user_data (user_id, name, email, age) VALUES (%s, %s, %s, %s)""",
+                                   (user_id, row["name"], row["email"], int(row["age"])))
         
         connection.commit()
         print(f"Data inserted successfully from {csv_file}")
