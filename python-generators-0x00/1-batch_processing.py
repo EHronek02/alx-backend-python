@@ -1,18 +1,6 @@
 import mysql.connector
 from typing import Generator, Dict, Any
-
-def connect_to_prodev() -> mysql.connector.connection.MySQLConnection:
-    """Connect to the ALX_prodev database"""
-    try:
-        return mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='',
-            database='ALX_prodev'
-        )
-    except mysql.connector.Error as e:
-        print(f"Error connecting to database: {e}")
-        return None
+from seed import connect_to_prodev
 
 def stream_users_in_batches(batch_size: int) -> Generator[Dict[str, Any], None, None]:
     """
