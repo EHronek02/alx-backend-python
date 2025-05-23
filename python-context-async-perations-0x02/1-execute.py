@@ -2,6 +2,7 @@
 """Implements a class based custom context manager ExecuteQuery"""
 import sqlite3
 
+
 class ExecuteQuery:
     """Custom Context manager that executes a parametirized query
     and returns a results"""
@@ -25,7 +26,7 @@ class ExecuteQuery:
 
             self.results = self.cursor.fetchall()
             return self.results
-        
+
         except sqlite3.Error as e:
             print(f"Query executing failed: {e}")
             raise
@@ -38,7 +39,8 @@ class ExecuteQuery:
             self.conn.close()
             print("Database connection closed")
         return False if exc_type else True
-    
+
+
 if __name__ == "__main__":
     try:
         with ExecuteQuery(

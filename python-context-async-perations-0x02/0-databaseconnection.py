@@ -16,7 +16,7 @@ class DatabaseConnection:
         print("Opeing the database connection...")
         self.conn = sqlite3.connect(self.db_name)
         return self.conn
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """close the connection when exiting the context"""
         if self.conn:
@@ -27,7 +27,7 @@ class DatabaseConnection:
             print(f"An error occured: {exc_val}")
             return False
         return True
-    
+
 
 def query_users():
     try:
@@ -42,6 +42,7 @@ def query_users():
         print(f"Database Error: {e}")
     except Exception as e:
         print(f"Unexpected Errror: {e}")
+
 
 if __name__ == "__main__":
     query_users()
