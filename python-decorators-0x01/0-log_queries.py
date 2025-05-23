@@ -10,7 +10,7 @@ def log_queries(func):
         query = kwargs.get('query', args[0] if args else None)
 
         # Log query
-        print(f"Executing query: {query} - {datetime.time()}")
+        print(f"Executing query: {query} - {datetime.now().time()}")
 
         return func(*args, **kwargs)
     return wrapper
