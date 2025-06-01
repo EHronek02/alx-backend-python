@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Defines a module to test utils file"""
-from utils import access_nested_map, get_json
+from utils import access_nested_map, get_json, memoize
 import unittest
 from parameterized import parameterized
 from unittest.mock import patch
@@ -45,6 +45,29 @@ class TestGetJson(unittest.TestCase):
         self.assertEqual(get_json(test_url), test_payload)
         mock.assert_called_once()
         patcher.stop()
+
+
+class TestMemoize(unittest.TestCase):
+    """class implements test cases for utils.memoize"""
+    def test_memoize(self):
+        """Tests a function when calling a_property twice
+        the correct result is returned but a_method is only
+        called once using assert_called_once"""
+
+        class TestClass:
+            """A Test class for wrapping with memoize"""
+            def a_method(self):
+                return 42
+            
+            @memoize
+            def a_property(self):
+                return self.a_method()
+            
+        with patch.object(TestClass, 'a_method') as mock:
+             test_class = TestClass()
+             test_class.a_property()
+             test_class.a_property()
+             mock.assert_called_once()
 
 
 if __name__ == "__main__":
