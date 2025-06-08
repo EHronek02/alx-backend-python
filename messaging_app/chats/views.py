@@ -4,6 +4,9 @@ from rest_framework.decorators import action
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
 from django.shortcuts import get_object_or_404
+from .permissions import IsParticipantOfConversation, IsMessageSenderOrParticipant, IsParticipant
+from .filters import MessageFilter
+
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """
@@ -11,7 +14,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsParticipant, IsParticipantOfConversation, IsMessageSenderOrParticipant]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-updated_at']
@@ -22,7 +25,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
         conversation = self.get_object()
-        serializer = MessageSerializer(data=request.data)
+        serializer = MessageSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save(conversation=conversation, sender=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -33,10 +36,11 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsParticipant, IsParticipantOfConversation, IsMessageSenderOrParticipant]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['sent_at']
     ordering = ['-sent_at']
+    filterset_class = MessageFilter
 
     def get_queryset(self):
         return self.queryset.filter(

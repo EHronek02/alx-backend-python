@@ -39,7 +39,7 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = [
         'email',
-        'last_name'
+        'last_name',
         'first_name']
 
     def __str__(self):
@@ -124,4 +124,4 @@ class Message(models.Model):
 
     def __str__(self):
         """String representation for the Message class"""
-        return f"{self.sender.username}: {self.content[:30]}"
+        return f"{self.sender.username}: {self.message_body[:30]}"
