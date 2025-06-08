@@ -29,7 +29,7 @@ class IsParticipantOfConversation(permissions.BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        user = request.user
+        """  user = request.user
 
         # If the object is a Conversation, check participation
         if isinstance(obj, Conversation):
@@ -38,5 +38,18 @@ class IsParticipantOfConversation(permissions.BasePermission):
         # If the object is a Message, check participation in the conversation
         if isinstance(obj, Message):
             return obj.conversation.participants.filter(pk=user.pk).exists()
+
+        return False """
+        conversation = obj.conversation
+
+        if request.method in permissions.SAFE_METHODS:
+            return request.user in conversation.participants.all()
+
+        if request.method in ['PUT', 'PATCH', 'DELETE']:
+            return request.user in conversation.participants.all()
+
+        # For POST (sending messages), must be in the conversation
+        if request.method == 'POST':
+            return request.user in conversation.participants.all()
 
         return False
