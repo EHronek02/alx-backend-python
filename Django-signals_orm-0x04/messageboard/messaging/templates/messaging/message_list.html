@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Your Messages</h2>
+
+<a href="{% url 'messaging:post_message' %}" class="btn btn-primary mb-3">
+    New Message
+</a>
+
+<div class="list-group">
+    {% for message in messages %}
+    <div class="list-group-item">
+        <div class="d-flex justify-content-between">
+            <h5>
+                {% if message.sender == request.user %}
+                To: {{ message.receiver.username }}
+                {% else %}
+                From: {{ message.sender.username }}
+                {% endif %}
+            </h5>
+            <small class="text-muted">{{ message.timestamp }}</small>
+        </div>
+        <p>{{ message.content }}</p>
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'messaging:message_detail' message.id %}" class="btn btn-sm btn-outline-primary me-2">
+                View
+            </a>
+            {% if message.sender == request.user %}
+            <a href="{% url 'messaging:edit_message' message.id %}" class="btn btn-sm btn-outline-secondary">
+                Edit
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">No messages yet.</div>
+    {% endfor %}
+</div>
+{% endblock %}

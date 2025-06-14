@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Message History{% endblock %}
+
+{% block content %}
+<div class="message-card">
+    <h2>Edit History for Message</h2>
+    <p class="lead">{{ message.content }}</p>
+    {% if message.is_edited %}
+    <small class="edited-badge">Last edited {{ message.last_edited|timesince }} ago</small>
+    {% endif %}
+
+    <h3 class="mt-4">Previous Versions:</h3>
+    {% for entry in history %}
+    <div class="history-entry">
+        <strong>{{ entry.edited_at }}</strong>
+        <span class="text-muted">(edited by {{ entry.edited_by.username }})</span>
+        <p class="mt-2">{{ entry.old_content }}</p>
+    </div>
+    {% empty %}
+    <p>No edit history available</p>
+    {% endfor %}
+
+    <a href="{% url 'messaging:message_detail' message.id %}" class="btn btn-primary mt-3">
+        Back to message
+    </a>
+</div>
+{% endblock %}
