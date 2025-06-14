@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.views.decorators.cache import cache_page
 
 app_name = 'messaging'  # For namespace
 
@@ -17,4 +18,6 @@ urlpatterns = [
 
     path('thread/<int:message_id>/', views.conversation_thread, name='conversation_thread'),
     path('reply/<int:parent_id>/', views.create_reply, name='create_reply'),
+    path('', cache_page(60)(views.message_list), name='message_list'),
+    path('thread/<int:message_id>/', views.conversation_thread, name='conversation_thread'),
 ]

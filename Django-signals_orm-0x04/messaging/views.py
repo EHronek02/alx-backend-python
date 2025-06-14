@@ -1,3 +1,4 @@
+from django.views import View
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Message, MessageHistory
 from django.contrib.auth.decorators import login_required
@@ -8,6 +9,9 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.db.models import Prefetch
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 
 def message_history(request, message_id):
@@ -130,3 +134,29 @@ def create_reply(request, parent_id):
             return redirect('messaging:conversation_thread', message_id=parent_id)
     
     return redirect('messaging:conversation_thread', message_id=parent_id)
+
+
+@cache_page(60)  # Cache for 60 seconds
+def message_list(request):
+    messages = Message.objects.filter(
+        models.Q(receiver=request.user) | 
+        models.Q(sender=request.user)
+    ).select_related('sender', 'receiver').order_by('-timestamp')
+    
+    return render(request, 'messaging/message_list.html', {
+        'messages': messages
+    })
+
+
+# OR for class-based views:
+class MessageListView(View):
+    @method_decorator(cache_page(60))
+    def get(self, request):
+        messages = Message.objects.filter(
+            models.Q(receiver=request.user) | 
+            models.Q(sender=request.user)
+        ).select_related('sender', 'receiver').order_by('-timestamp')
+        
+        return render(request, 'messaging/message_list.html', {
+            'messages': messages
+        })

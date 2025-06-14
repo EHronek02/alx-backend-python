@@ -3,6 +3,8 @@ from django.dispatch import receiver
 from .models import Message, Notification, MessageHistory
 from datetime import timezone
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+
 
 User = get_user_model()
 
@@ -50,3 +52,15 @@ def cleanup_user_data(sender, instance, **kwargs):
 
     # Delete message hostry where user edited messages
     MessageHistory.objects.filter(edited_by=instance).delete()
+
+
+@receiver(post_save, sender=Message)
+@receiver(post_delete, sender=Message)
+def clear_message_cache(sender, instance, **kwargs):
+    # Clear list cache for both sender and receiver
+    cache.delete_many([
+        f'thread_{instance.id}_{instance.sender.id}',
+        f'thread_{instance.id}_{instance.receiver.id}',
+    ])
+    # Clear general message list cache
+    cache.delete_pattern('messages_*')  # Requires django-redis for pattern deletion
