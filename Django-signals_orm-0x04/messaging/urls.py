@@ -12,4 +12,6 @@ urlpatterns = [
     
     # History URLs
     path('<int:message_id>/history/', views.message_history, name='message_history'),
+    path('delete-account/', views.delete_user_confirm, name='delete_user_confirm'),
+    path('delete-account/confirm/', views.delete_user, name='delete_user')
 ]

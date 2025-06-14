@@ -4,6 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.db import models
 from .models import User
 from django.http import HttpResponseForbidden
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+from django.contrib.auth import logout
+
 
 def message_history(request, message_id):
     message = get_object_or_404(Message, pk=message_id)
@@ -74,3 +78,19 @@ def edit_message(request, pk):
     return render(request, 'messaging/edit_message.html', {
         'message': message
     })
+
+@login_required
+def delete_user_confirm(request):
+    """Show account deletion confirmation page"""
+    return render(request, 'messaging/delete_account.html')
+
+
+@login_required
+@require_POST
+def delete_user(request):
+    """View to handle user account deletion"""
+    user = request.user
+    logout(request)
+    user.delete()  # This will trigger the post_delete signal
+    messages.success(request, 'Your account has been successfully deleted.')
+    return redirect('home')  # Redirect to your home page

@@ -1,6 +1,10 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from .models import Message, Notification, MessageHistory
+from datetime import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 @receiver(post_save, sender=Message)
@@ -34,3 +38,15 @@ def track_message_edits(sender, instance, **kwargs):
         except Message.DoesNotExist:
             pass
 
+@receiver(post_delete, sender=User)
+def cleanup_user_data(sender, instance, **kwargs):
+    """clean up all related data when a user is deleted"""
+    # Delete messages where user is sender or receiver
+    Message.objects.filter(sender=instance).delete()
+    Message.objects.filter(receiver=instance).delete()
+
+    # Delete notifications for the user
+    Notification.objects.filter(user=instance).delete()
+
+    # Delete message hostry where user edited messages
+    MessageHistory.objects.filter(edited_by=instance).delete()
