@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="thread-container">
+    <h2>Conversation Thread</h2>
+
+    <div class="message-thread">
+        {% for message in thread_messages %}
+        <div class="message {% if message == base_message %}highlighted{% endif %}"
+            style="margin-left: {% widthratio message.level 1 20 %}px;">
+            <div class="message-header">
+                <strong>{{ message.sender.username }}</strong>
+                <small>{{ message.timestamp }}</small>
+            </div>
+            <div class="message-content">{{ message.content }}</div>
+
+            {% if not forloop.last %}
+            <div class="reply-connector"></div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'messaging:reply' base_message.id %}">
+        {% csrf_token %}
+        <textarea name="content" required></textarea>
+        <button type="submit">Reply</button>
+    </form>
+</div>
+{% endblock %}

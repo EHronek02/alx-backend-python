@@ -7,6 +7,7 @@ from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.db.models import Prefetch
 
 
 def message_history(request, message_id):
@@ -94,3 +95,38 @@ def delete_user(request):
     user.delete()  # This will trigger the post_delete signal
     messages.success(request, 'Your account has been successfully deleted.')
     return redirect('home')  # Redirect to your home page
+
+
+def conversation_thread(request, message_id):
+    """Get the base message with alll replies efficeintly"""
+    base_message = get_object_or_404(
+        Message.objects.select_related('sender', 'receiver')
+                        .prefetch_related(
+                            Prefetch('replies',
+                                     queryset=Message.objects.select_related('sender', 'receiver')),
+                        ),
+                        pk=message_id
+    )
+    return render(request, 'messaging/thread.html',{
+        'base_message':  base_message,
+        'thread_messages': base_message.get_thread()
+    })
+
+
+@login_required
+def create_reply(request, parent_id):
+    parent_message = get_object_or_404(Message, pk=parent_id)
+    
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            Message.objects.create(
+                sender=request.user,
+                receiver=parent_message.sender if request.user == parent_message.receiver else parent_message.receiver,
+                content=content,
+                parent_message=parent_message
+            )
+            messages.success(request, 'Reply sent successfully.')
+            return redirect('messaging:conversation_thread', message_id=parent_id)
+    
+    return redirect('messaging:conversation_thread', message_id=parent_id)

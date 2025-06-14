@@ -12,9 +12,31 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False)
     is_edited = models.BooleanField(default=False)
     last_edited = models.DateTimeField(null=True, blank=True)
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        related_name='replies',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['parent_message'])
+        ]
 
     def __str__(self):
         return f"Message from {self.sender} to {self.receiver}"
+    
+    def get_thread(self):
+        """Get all messages in this thread"""
+        messages = []
+        current = self
+        while current:
+            messages.append(current)
+            current = current.parent_message
+        return reversed(messages)
     
 
 class MessageHistory(models.Model):

@@ -1,0 +1,24 @@
+.message-thread {
+    margin: 20px 0;
+}
+
+.message {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-left: 3px solid #ddd;
+    position: relative;
+}
+
+.message.highlighted {
+    border-left-color: #4CAF50;
+    background-color: #f8f8f8;
+}
+
+.reply-connector {
+    position: absolute;
+    left: -15px;
+    top: 30px;
+    bottom: -5px;
+    width: 2px;
+    background-color: #ddd;
+}
