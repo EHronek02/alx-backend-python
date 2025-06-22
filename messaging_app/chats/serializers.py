@@ -55,10 +55,15 @@ class MessageSerializer(serializers.ModelSerializer):
         write_only=True,
         source='sender'
     )
+    conversation_id = serializers.PrimaryKeyRelatedField(
+        queryset=Conversation.objects.all(),
+        write_only=True,
+        source='conversation'
+    )
 
     class Meta:
         model = Message
-        fields = ['id', 'conversation', 'sender', 'sender_id', 'message_body', 'sent_at', 'read']
+        fields = ['message_id', 'conversation', 'conversation_id', 'sender', 'sender_id', 'message_body', 'sent_at', 'read']
         read_only_fields = ['message_id', 'sender', 'sent_at']
 
     def create(self, validated_data):

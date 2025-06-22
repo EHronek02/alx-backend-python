@@ -65,7 +65,7 @@ class Conversation(models.Model):
         help_text=_("when conversation was started")
     )
     updated_at = models.DateTimeField(
-        auto_now_add=True,
+        auto_now=True,
         help_text=_("last time the conversation object was updated")
     )
     is_group = models.BooleanField(
