@@ -12,10 +12,17 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
+    default-libmysqlclient-dev \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    libffi-dev \
+    netcat-openbsd \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install dependencies
-COPY requirements.txt .
+COPY Requirements.txt .
 RUN pip install --no-cache-dir -r Requirements.txt
 
 # Copy the whole app
