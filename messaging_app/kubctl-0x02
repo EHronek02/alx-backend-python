@@ -14,18 +14,18 @@ SERVICE_NAME="django-active-service"
 
 # --- Step 1: Deploy Both Versions ---
 deploy_versions() {
-    echo "🚀 Deploying Blue (v1) and Green (v2) versions..."
+    echo "Deploying Blue (v1) and Green (v2) versions..."
     kubectl apply -f $BLUE_DEPLOYMENT
     kubectl apply -f $GREEN_DEPLOYMENT
     
-    echo -n "🕒 Waiting for pods to be ready..."
+    echo -n "Waiting for pods to be ready..."
     kubectl wait --for=condition=ready pod -l app=django-messaging --timeout=120s
-    echo "✅ Done"
+    echo "Done"
 }
 
 # --- Step 2: Verify New Version ---
 verify_green() {
-    echo "🔍 Checking Green version (v$GREEN_VERSION) logs..."
+    echo "Checking Green version (v$GREEN_VERSION) logs..."
     GREEN_POD=$(kubectl get pods -l version=$GREEN_VERSION -o jsonpath='{.items[0].metadata.name}')
     
     kubectl logs $GREEN_POD | tail -n 20
@@ -35,19 +35,19 @@ verify_green() {
 
 # --- Step 3: Switch Traffic ---
 switch_traffic() {
-    echo "🔄 Switching service to Green version (v$GREEN_VERSION)..."
+    echo "Switching service to Green version (v$GREEN_VERSION)..."
     kubectl patch service $SERVICE_NAME -p '{"spec":{"selector":{"version":"'$GREEN_VERSION'"}}}'
     
-    echo "🔄 Current service endpoints:"
+    echo "Current service endpoints:"
     kubectl get endpoints $SERVICE_NAME
 }
 
 # --- Step 4: Clean Up Old Version ---
 cleanup_blue() {
-    read -p "❓ Keep Blue version running? (y/n) " -n 1 -r
+    read -p "Keep Blue version running? (y/n) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "🧹 Scaling down Blue version..."
+        echo "Scaling down Blue version..."
         kubectl scale deployment django-blue --replicas=0
     fi
 }
@@ -59,7 +59,7 @@ main() {
     switch_traffic
     cleanup_blue
     
-    echo -e "\n🎉 Blue-Green deployment complete!"
+    echo -e "\nBlue-Green deployment complete!"
     echo "Active version: Green (v$GREEN_VERSION)"
 }
 

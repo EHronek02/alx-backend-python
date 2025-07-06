@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -21,10 +21,19 @@ services:
       timeout: 3s
       retries: 10
 
-
   web:
     build: .
-    command: ["./wait-for-it.sh", "db", "3306", "--", "python3", "manage.py", "runserver", "0.0.0.0:8000"]
+    command:
+      [
+        "./wait-for-it.sh",
+        "db",
+        "3306",
+        "--",
+        "python3",
+        "manage.py",
+        "runserver",
+        "0.0.0.0:8000",
+      ]
     volumes:
       - .:/app
     ports:
