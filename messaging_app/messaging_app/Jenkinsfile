@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV_DIR = '.venv' // Set virtual environment folder name
+        PROJECT_DIR = 'messaging_app'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'GitHub Credentials',
+                    url: 'https://github.com/alx-backend-python.git'
+            }
+        }
+
+        stage('Set Up Python') {
+            steps {
+                // use shiningPanda to set up a virtualenv
+                withPythonEnv("${VENV_DIR}") {
+                    sh 'python3 -m venv .venv'
+                    sh '. .venv/bin/activate && pip install --upgrade pip'
+                    sh '. .venv/bin/activate && pip install -r requirements.txt'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                withPythonEnv("${VENV_DIR}") {
+                    sh '. .venv/bin/activate && pytest messaging_app/tests --junitxml=test-results/report.xml'
+                }
+            }
+            post {
+                always {
+                    junit "${env.PROJECT_DIR}/test-results.xml"
+                }
+            }
+        }
+
+        stage('Publish Test Report') {
+            steps {
+                junit 'test-results/report.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs() // clean up workspace
+        }
+    }
+}
