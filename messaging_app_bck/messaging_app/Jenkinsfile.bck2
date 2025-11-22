@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV_DIR = '.venv'
+    }
+
+    stages {
+        stage('Set Up Python') {
+            steps {
+                dir('messaging_app/messaging_app') {
+                    withPythonEnv("${VENV_DIR}") {
+                        sh 'python3 -m venv .venv'
+                        sh '. ${VENV_DIR}/bin/activate && pip install --upgrade pip'
+                        sh '. ${VENV_DIR}/bin/activate && pip install -r requirements.txt'
+                    }
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                dir('messaging_app/messaging_app') {
+                    withPythonEnv("${VENV_DIR}") {
+                        sh '. .venv/bin/activate && pytest chats/tests.py --junitxml=test-results/report.xml'
+                    }
+                }
+            }
+            post {
+                always {
+                    junit 'messaging_app/messaging_app/test-results/report.xml'
+                }
+            }
+        }
+
+        stage('Publish Test Report') {
+            steps {
+                junit 'messaging_app/messaging_app/test-results/report.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}

@@ -1,0 +1,35 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+.env
+.DS_Store
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+.env
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Database migrations (optional, see note below)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Python cache
+*.py[cod]
